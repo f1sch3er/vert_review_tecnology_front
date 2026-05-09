@@ -5,7 +5,6 @@ import { Button } from '../../components/Button';
 import { AppToast } from '../../utils/alerts';
 import { userService } from '../../services/userService'; 
 
-const appName = import.meta.env.VITE_APP_NAME;
 
 export default function RegisterComplement() {
   const navigate = useNavigate();
@@ -24,7 +23,6 @@ export default function RegisterComplement() {
     }
   });
 
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -51,8 +49,8 @@ export default function RegisterComplement() {
    
       AppToast.fire({
         icon: 'success',
-        title: 'Perfil atualizado!',
-        text: 'Seu cadastro foi completado com sucesso.',
+        title: 'Profile Updated!',
+        text: 'Your registration has been successfully completed.',
         timer: 2000,
         showConfirmButton: false
       });
@@ -63,24 +61,20 @@ export default function RegisterComplement() {
 
     } catch (error: any) {
       const errorData = error.response?.data;
-      
-      let msg = 'Erro ao salvar dados.';
+      let msg = 'Error saving data.';
 
       if (Array.isArray(errorData)) {
         msg = errorData[0];
-      } 
-
-      else if (errorData?.message) {
+      } else if (errorData?.message) {
         msg = errorData.message;
-      }
-      else if (typeof errorData === 'object') {
+      } else if (typeof errorData === 'object') {
         const firstKey = Object.keys(errorData)[0];
         msg = errorData[firstKey];
       }
 
       AppToast.fire({ 
         icon: 'error', 
-        title: 'Atenção',
+        title: 'Attention',
         text: msg 
       });
 
@@ -90,18 +84,19 @@ export default function RegisterComplement() {
   };
 
   return (
-    <div className="flex min-h-screen bg-brand-dark font-sans">
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-24 py-12">
-        <div className="max-w-md w-full mx-auto space-y-8">
+    <div className="flex min-h-screen bg-[#0F1115] font-sans">
+      {/* Left Side: Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-24 py-12 relative">
+        <div className="max-w-md w-full mx-auto space-y-10">
           <header>
-            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Quase lá!</h2>
-            <p className="mt-2 text-gray-400 text-lg">Complete seu perfil para liberar todas as funções.</p>
+            <h2 className="text-4xl font-black tracking-tighter text-white italic uppercase">Almost there!</h2>
+            <p className="mt-4 text-slate-500 text-lg">Complete your profile to unlock all financial features.</p>
           </header>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <Input 
-                label="CPF" 
+                label="Document (CPF)" 
                 name="document_number" 
                 placeholder="000.000.000-00"
                 value={formData.document_number} 
@@ -109,9 +104,9 @@ export default function RegisterComplement() {
                 required 
               />
               <Input 
-                label="Telefone" 
+                label="Phone Number" 
                 name="phone_number" 
-                placeholder="11999998888"
+                placeholder="+55 11 9..."
                 value={formData.phone_number} 
                 onChange={handleChange} 
                 required 
@@ -119,7 +114,7 @@ export default function RegisterComplement() {
             </div>
 
             <Input 
-              label="Data de Nascimento" 
+              label="Date of Birth" 
               name="birth_date" 
               type="date" 
               value={formData.birth_date} 
@@ -127,13 +122,17 @@ export default function RegisterComplement() {
               required 
             />
 
-            <div className="pt-4">
-              <h3 className="text-white font-semibold mb-4 border-b border-gray-800 pb-2">Endereço</h3>
+            <div className="pt-6">
+              <div className="flex items-center gap-4 mb-6">
+                <h3 className="text-white font-bold text-sm uppercase tracking-widest">Address Details</h3>
+                <div className="h-px flex-1 bg-white/5" />
+              </div>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <Input 
-                  label="Rua / Avenida / Logradouro" 
+                  label="Street / Avenue" 
                   name="address.street" 
+                  placeholder="Street Name, 123"
                   value={formData.address.street} 
                   onChange={handleChange} 
                   required 
@@ -141,7 +140,7 @@ export default function RegisterComplement() {
 
                 <div className="grid grid-cols-3 gap-4">
                   <Input 
-                    label="CEP" 
+                    label="Zip Code" 
                     name="address.zip_code" 
                     placeholder="00000-000"
                     value={formData.address.zip_code} 
@@ -149,16 +148,17 @@ export default function RegisterComplement() {
                     required 
                   />
                   <Input 
-                    label="Cidade" 
+                    label="City" 
                     name="address.city" 
+                    placeholder="New York"
                     value={formData.address.city} 
                     onChange={handleChange} 
                     required 
                   />
                   <Input 
-                    label="UF" 
+                    label="State" 
                     name="address.state" 
-                    placeholder="SP"
+                    placeholder="NY"
                     value={formData.address.state} 
                     onChange={handleChange} 
                     maxLength={2}
@@ -171,19 +171,30 @@ export default function RegisterComplement() {
             <Button 
               type="submit"
               isLoading={isLoading}
-              className="mt-6"
+              className="mt-8 py-4 text-sm tracking-[0.1em] font-bold"
             >
-              Finalizar cadastro
+              FINALIZE REGISTRATION
             </Button>
           </form>
         </div>
+
+        <div className="absolute bottom-8 left-0 w-full flex justify-center opacity-10 grayscale">
+           <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-400">
+             KYC & Compliance Verification
+           </p>
+        </div>
       </div>
 
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-tr from-brand-dark via-brand-dark to-brand-purple/30 justify-center items-center border-l border-gray-800">
-        <div className="text-center p-12">
-            <h1 className="text-4xl font-bold text-white mb-4 italic tracking-tight uppercase">Core Banking</h1>
-            <p className="text-gray-400 max-w-sm mx-auto text-lg leading-relaxed">
-              Segurança e conformidade para suas transações.
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-[#0F1115] via-[#16191E] to-brand-purple/20 justify-center items-center border-l border-white/5 relative overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-purple/5 rounded-full blur-[120px]" />
+        
+        <div className="text-center p-12 relative z-10">
+            <h1 className="text-6xl font-black text-white mb-6 italic tracking-tighter uppercase leading-none">
+              Core<br/>Banking
+            </h1>
+            <div className="h-1 w-20 bg-brand-purple mx-auto mb-8" />
+            <p className="text-slate-400 max-w-sm mx-auto text-lg leading-relaxed font-medium">
+              Security and compliance for your global transactions.
             </p>
         </div>
       </div>

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '../../components/Input';
-import { Button } from '../../components/Button'; // Importando o novo componente
+import { Button } from '../../components/Button';
 import { AppToast } from '../../utils/alerts';
 import { userService } from '../../services/userService'; 
 import { useAuth } from '../../hooks/useAuth';
-import api from '../../services/api'; // Certifique-se de importar sua instância da API
+import api from '../../services/api';
 
 const appName = import.meta.env.VITE_APP_NAME;
 
@@ -30,16 +30,14 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Validação básica de senha
     if (formData.password !== formData.confirmPassword) {
-      AppToast.fire({ icon: 'error', title: 'As senhas não coincidem!' });
+      AppToast.fire({ icon: 'error', title: 'Passwords do not match!' });
       return;
     }
 
     try {
       setIsLoading(true);
 
-      // 2. Chamada para checar se o e-mail já existe
       const { data } = await api.get(`/users/check-email/`, {
         params: { email: formData.email }
       });
@@ -47,21 +45,18 @@ export default function Register() {
       if (data.exists) {
         AppToast.fire({
           icon: 'warning',
-          title: 'E-mail em uso!',
-          text: 'Este endereço de e-mail já está cadastrado em nossa plataforma.'
+          title: 'Email already in use!',
+          text: 'This email address is already registered in our platform.'
         });
-        return; // Interrompe o registro
+        return;
       }
       
-      // 3. Prossegue com o registro
       await userService.register(formData);
-      
-      // 4. Login automático
       await signIn({ email: formData.email, password: formData.password });
 
       AppToast.fire({
         icon: 'success',
-        title: 'Conta criada com sucesso! Entrando...'
+        title: 'Account created! Signing in...'
       });
 
       setTimeout(() => {
@@ -69,7 +64,7 @@ export default function Register() {
       }, 1000);
       
     } catch (error: any) {
-      const serverMessage = error.response?.data?.message || 'Erro ao criar conta.';
+      const serverMessage = error.response?.data?.message || 'Failed to create account.';
       AppToast.fire({ icon: 'error', title: serverMessage });
     } finally {
       setIsLoading(false);
@@ -77,48 +72,109 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen bg-brand-dark font-sans">
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-24 py-12">
-        <div className="max-w-md w-full mx-auto space-y-8">
+    <div className="flex min-h-screen bg-[#0F1115] font-sans">
+      {/* Left Side: Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-24 py-12 relative">
+        <div className="max-w-md w-full mx-auto space-y-10">
           <header>
-            <h2 className="text-5xl font-extrabold tracking-tighter text-white">{appName}</h2>
-            <p className="mt-4 text-gray-400 text-lg">Crie sua conta e comece a transacionar.</p>
+            <h2 className="text-5xl font-black tracking-tighter text-white italic uppercase drop-shadow-sm">
+              {appName}
+            </h2>
+            <p className="mt-4 text-slate-500 text-lg">
+              Create your account and start transacting globally.
+            </p>
           </header>
           
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Nome" name="firstName" value={formData.firstName} onChange={handleChange} required />
-              <Input label="Sobrenome" name="lastName" value={formData.lastName} onChange={handleChange} required />
+              <Input 
+                label="First Name" 
+                name="firstName" 
+                placeholder="John"
+                value={formData.firstName} 
+                onChange={handleChange} 
+                required 
+              />
+              <Input 
+                label="Last Name" 
+                name="lastName" 
+                placeholder="Doe"
+                value={formData.lastName} 
+                onChange={handleChange} 
+                required 
+              />
             </div>
 
-            <Input label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} required />
+            <Input 
+              label="Email Address" 
+              name="email" 
+              type="email" 
+              placeholder="name@example.com"
+              value={formData.email} 
+              onChange={handleChange} 
+              required 
+            />
             
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Senha" name="password" type="password" value={formData.password} onChange={handleChange} required />
-              <Input label="Confirmar" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} required />
+              <Input 
+                label="Password" 
+                name="password" 
+                type="password" 
+                placeholder="••••••••"
+                value={formData.password} 
+                onChange={handleChange} 
+                required 
+              />
+              <Input 
+                label="Confirm" 
+                name="confirmPassword" 
+                type="password" 
+                placeholder="••••••••"
+                value={formData.confirmPassword} 
+                onChange={handleChange} 
+                required 
+              />
             </div>
 
-            {/* Novo componente Button com suporte a loading e estilos padronizados */}
             <Button 
               type="submit"
               isLoading={isLoading}
-              className="mt-4"
+              className="mt-6 py-4 text-sm tracking-[0.1em] font-bold"
             >
-              Criar minha conta
+              CREATE MY ACCOUNT
             </Button>
           </form>
 
-          <p className="text-center text-gray-400">
-            Já tem uma conta? <Link to="/login" className="text-brand-purple font-bold hover:underline">Voltar ao login</Link>
-          </p>
+          <footer className="pt-4">
+            <p className="text-center text-slate-500 text-sm">
+              Already have an account?{' '}
+              <Link to="/login" className="text-brand-purple font-bold hover:text-brand-purple/80 transition-colors underline-offset-4 hover:underline">
+                Sign in here
+              </Link>
+            </p>
+          </footer>
+        </div>
+
+        {/* Footer de Segurança sutil */}
+        <div className="absolute bottom-8 left-0 w-full flex justify-center opacity-10 grayscale">
+           <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-400">
+             Ledger Protocol Secured
+           </p>
         </div>
       </div>
 
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-tr from-brand-dark via-brand-dark to-brand-purple/30 justify-center items-center border-l border-gray-800">
-        <div className="text-center p-12">
-            <h1 className="text-4xl font-bold text-white mb-4 italic tracking-tight uppercase">Core Banking</h1>
-            <p className="text-gray-400 max-w-sm mx-auto text-lg leading-relaxed">
-              A sua jornada financeira começa agora.
+  
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-[#0F1115] via-[#16191E] to-brand-purple/20 justify-center items-center border-l border-white/5 relative overflow-hidden">
+       
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-purple/5 rounded-full blur-[120px]" />
+        
+        <div className="text-center p-12 relative z-10">
+            <h1 className="text-6xl font-black text-white mb-6 italic tracking-tighter uppercase leading-none">
+              Core<br/>Banking
+            </h1>
+            <div className="h-1 w-20 bg-brand-purple mx-auto mb-8" />
+            <p className="text-slate-400 max-w-xs mx-auto text-lg leading-relaxed font-medium">
+              The next generation of financial infrastructure. Your journey starts now.
             </p>
         </div>
       </div>
