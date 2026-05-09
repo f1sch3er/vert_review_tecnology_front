@@ -1,17 +1,20 @@
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  prefix?: string; // Nova prop opcional para o R$
+  prefix?: string;
 }
 
 export function Input({ label, prefix, className, ...props }: InputProps) {
   return (
-    <div className="space-y-2 w-full">
-      {label && <label className="text-sm font-medium text-gray-300">{label}</label>}
+    <div className="space-y-1.5 w-full">
+      {label && (
+        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+          {label}
+        </label>
+      )}
       
-      <div className="relative flex items-center">
-        {/* Renderiza o prefixo apenas se ele existir */}
+      <div className="relative group flex items-center">
         {prefix && (
-          <span className="absolute left-4 text-xl font-black text-brand-purple pointer-events-none z-10">
+          <span className="absolute left-4 text-sm font-bold text-brand-purple/80 pointer-events-none z-10 transition-colors group-focus-within:text-brand-purple">
             {prefix}
           </span>
         )}
@@ -19,10 +22,11 @@ export function Input({ label, prefix, className, ...props }: InputProps) {
         <input 
           {...props}
           className={`
-            w-full bg-dark-surface border border-gray-800 rounded-xl 
-            focus:ring-2 focus:ring-brand-purple focus:outline-none 
-            transition-all text-white p-4
-            ${prefix ? 'pl-14' : 'pl-4'} 
+            w-full bg-[#0D0F12] border border-white/5 rounded-xl 
+            placeholder:text-slate-600 text-sm
+            focus:border-brand-purple/40 focus:bg-[#121519] focus:ring-4 focus:ring-brand-purple/5
+            focus:outline-none transition-all duration-200 text-slate-200 p-3.5
+            ${prefix ? 'pl-12' : 'pl-4'} 
             ${className} 
           `}
         />

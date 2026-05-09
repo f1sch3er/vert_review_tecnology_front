@@ -23,24 +23,19 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        setLoading(true); // Inicia o loading
-        
-        // Chamadas reais ao backend em paralelo
-        const [accountData, transactionsData] = await Promise.all([
-          accountService.getMe(),
-          transferService.getRecentActivity()
-        ]);
-
+        setLoading(true);
+        const accountData = await accountService.getMe();
         setAccount(accountData);
+        const transactionsData = await transferService.getRecentActivity();
         setTransactions(transactionsData);
-
       } catch (error: any) {
-        console.error("Erro ao carregar dados do Dashboard:", error);
-        if (error.response?.data?.detail === "Conta não encontrada.") {
+        console.error("Erro ao carregar dados:", error);
+        if (error.response?.status === 404) {
           navigate('/complete-profile');
+          return;
         }
       } finally {
-        setLoading(false); // Finaliza o loading independente do resultado
+        setLoading(false);
       }
     }
     loadData();
@@ -60,96 +55,112 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0A0A0B] text-white font-sans overflow-hidden">
+    // MUDANÇA: Fundo principal agora é um cinza azulado muito profundo, não preto puro
+    <div className="flex h-screen bg-[#0F1115] text-slate-200 font-sans overflow-hidden">
       
       {/* SIDEBAR */}
-      <aside className="w-64 bg-[#111114] border-r border-gray-800 p-6 flex flex-col">
+      {/* MUDANÇA: Sidebar um tom acima do fundo e borda mais sutil */}
+      <aside className="w-64 bg-[#16191E] border-r border-white/5 p-6 flex flex-col">
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="w-8 h-8 bg-brand-purple rounded-lg flex items-center justify-center font-black text-white">F</div>
-          <h1 className="text-xl font-bold tracking-tighter text-white">
+          <div className="w-8 h-8 bg-brand-purple rounded-md flex items-center justify-center font-black text-white shadow-lg shadow-brand-purple/20">F</div>
+          <h1 className="text-lg font-semibold tracking-tight text-white">
             {texts.COMMON.APP_NAME}
           </h1>
         </div>
-        <nav className="space-y-2 flex-1">
-          <Link to="/dashboard" className="block p-3 rounded-xl bg-brand-purple/10 text-brand-purple font-bold">
+        <nav className="space-y-1.5 flex-1">
+          <Link to="/dashboard" className="block px-4 py-2.5 rounded-lg bg-brand-purple/10 text-brand-purple font-medium text-sm">
             {texts.SIDEBAR.DASHBOARD}
           </Link>
-          <Link to="/profile" className="block p-3 rounded-xl text-gray-500 hover:bg-gray-800 transition-all">
+          <Link to="/profile" className="block px-4 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all text-sm">
             {texts.SIDEBAR.PROFILE}
           </Link>
         </nav>
-        <button onClick={() => signOut()} className="mt-auto flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-all font-bold">
-          <span>Logout</span> <span className="text-lg">➔</span>
+        <button onClick={() => signOut()} className="mt-auto flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-400/5 transition-all text-sm font-medium">
+          <span>Logout</span>
         </button>
       </aside>
 
       {/* CONTEÚDO PRINCIPAL */}
-      <main className="flex-1 overflow-y-auto p-8 lg:p-12">
+      <main className="flex-1 overflow-y-auto p-8 lg:p-10">
         <header className="flex justify-between items-center mb-10">
           <div>
-            <h2 className="text-sm font-bold text-brand-purple uppercase tracking-[0.2em] mb-1">Overview</h2>
-            <h3 className="text-3xl font-black italic">
-              {texts.DASHBOARD.GREETING}, {user?.first_name || 'Usuário'}!
+            <h2 className="text-[11px] font-bold text-brand-purple uppercase tracking-widest mb-1 opacity-80">Overview</h2>
+            <h3 className="text-2xl font-semibold text-white">
+              {texts.DASHBOARD.GREETING}, <span className="text-brand-purple">{user?.first_name || 'Usuário'}</span>
             </h3>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={toggleLang} className="flex items-center gap-2 px-3 py-2 bg-[#111114] border border-gray-800 rounded-xl hover:border-brand-purple transition-all group">
-              <span className="text-lg">🌐</span>
-              <span className="text-xs font-bold text-gray-400 group-hover:text-white transition-colors">{lang}</span>
+          <div className="flex items-center gap-3">
+            <button onClick={toggleLang} className="flex items-center gap-2 px-3 py-1.5 bg-[#1C2025] border border-white/5 rounded-lg hover:border-brand-purple/50 transition-all group">
+              <span className="text-xs font-bold text-slate-400 group-hover:text-white uppercase">{lang}</span>
             </button>
-            <Link to="/profile" className="h-12 w-12 rounded-2xl bg-gradient-to-br from-brand-purple to-purple-700 flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
-              <span className="font-bold uppercase">{user?.first_name?.[0]}{user?.last_name?.[0]}</span>
+            <Link to="/profile" className="h-10 w-10 rounded-full bg-gradient-to-tr from-brand-purple to-indigo-600 flex items-center justify-center shadow-md shadow-brand-purple/20 hover:brightness-110 transition-all">
+              <span className="text-xs font-bold text-white uppercase">{user?.first_name?.[0]}{user?.last_name?.[0]}</span>
             </Link>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            {/* SALDO */}
-            <div className="p-10 bg-brand-purple rounded-[2.5rem] relative overflow-hidden group">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* CARD DE SALDO - MUDANÇA: Borda reduzida e degradê mais suave */}
+            <div className="p-8 bg-gradient-to-br from-brand-purple to-[#7c3aed] rounded-2xl relative overflow-hidden shadow-xl shadow-brand-purple/10">
               <div className="relative z-10">
-                <p className="text-purple-200 font-medium mb-2 opacity-80">{texts.DASHBOARD.STATS.BALANCE}</p>
+                <p className="text-purple-100/70 text-sm font-medium mb-1">{texts.DASHBOARD.STATS.BALANCE}</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-purple-300">{lang === 'PT' ? 'R$' : '$'}</span>
-                  <h4 className="text-6xl font-black tracking-tighter">
+                  <span className="text-xl font-medium text-purple-200">{lang === 'PT' ? 'R$' : '$'}</span>
+                  <h4 className="text-5xl font-bold tracking-tight text-white">
                     {account ? formatBalance(account.available_balance) : '0,00'}
                   </h4>
                 </div>
               </div>
-              <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all" />
+              {/* Elementos decorativos mais discretos */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl" />
             </div>
 
-            {/* COMPONENTE DE ATIVIDADES COM DADOS REAIS */}
             <RecentActivity 
               transactions={transactions}
               formatBalance={formatBalance}
               lang={lang} 
-              loading={loading} // Agora recebe o estado real
+              loading={loading}
             />
           </div>
 
           {/* COLUNA DA DIREITA */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             <KafkaStatus />
-            <div className="space-y-4">
-               <Link to="/deposit" className="block p-6 bg-[#111114] border border-gray-800/50 rounded-[2rem] hover:border-green-500/30 transition-all group relative overflow-hidden">
-                  <div className="w-10 h-10 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-500 group-hover:text-white transition-all text-xl">+</div>
-                  <h4 className="font-bold text-lg">Adicionar Crédito</h4>
-                  <p className="text-xs text-gray-500">Via Ledger/Kafka</p>
+            <div className="grid grid-cols-1 gap-4">
+               {/* MUDANÇA: Cards de ação agora com rounded-xl e cores menos gritantes */}
+               <Link to="/deposit" className="block p-5 bg-[#1C2025] border border-white/5 rounded-xl hover:bg-[#23282f] transition-all group border-l-2 border-l-green-500/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-white">Adicionar Crédito</h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Via Ledger/Kafka</p>
+                    </div>
+                    <div className="w-8 h-8 bg-green-500/10 text-green-500 rounded-lg flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-all">
+                      <span className="text-lg">+</span>
+                    </div>
+                  </div>
                </Link>
-               <Link to="/transfer" className="block p-6 bg-[#111114] border border-gray-800/50 rounded-[2rem] hover:border-brand-purple/30 transition-all group relative overflow-hidden">
-                  <div className="w-10 h-10 bg-brand-purple/10 text-brand-purple rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-purple group-hover:text-white transition-all text-sm">💸</div>
-                  <h4 className="font-bold text-lg">Nova Transferência</h4>
-                  <p className="text-xs text-gray-500">Envio instantâneo</p>
+
+               <Link to="/transfer" className="block p-5 bg-[#1C2025] border border-white/5 rounded-xl hover:bg-[#23282f] transition-all group border-l-2 border-l-brand-purple/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-white">Nova Transferência</h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Envio instantâneo</p>
+                    </div>
+                    <div className="w-8 h-8 bg-brand-purple/10 text-brand-purple rounded-lg flex items-center justify-center group-hover:bg-brand-purple group-hover:text-white transition-all">
+                      <span className="text-xs">💸</span>
+                    </div>
+                  </div>
                </Link>
             </div>
-            <div className="p-6 bg-[#111114]/50 border border-gray-800/30 rounded-[2rem]">
-               <div className="flex items-center gap-2 mb-3">
-                 <div className="w-6 h-6 bg-blue-500/10 rounded flex items-center justify-center text-[10px]">🛡️</div>
-                 <h4 className="font-bold text-xs text-gray-400">Segurança</h4>
+
+            <div className="p-5 bg-white/[0.02] border border-white/5 rounded-xl">
+               <div className="flex items-center gap-2 mb-2">
+                 <div className="w-5 h-5 bg-blue-500/10 rounded flex items-center justify-center text-[10px] text-blue-400">🛡️</div>
+                 <h4 className="font-semibold text-[11px] text-slate-400 uppercase tracking-wider">Segurança</h4>
                </div>
-               <p className="text-[10px] text-gray-600 leading-relaxed uppercase font-medium tracking-tight">
-                 Sua conta está protegida com criptografia de ponta a ponta e chaves de idempotência em cada mensagem do Redpanda.
+               <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                 Proteção com criptografia de ponta a ponta e chaves de idempotência via Redpanda.
                </p>
             </div>
           </div>

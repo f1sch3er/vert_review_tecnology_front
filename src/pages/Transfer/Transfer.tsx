@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppToast } from '../../utils/alerts';
 import { accountService } from '../../services/accountService';
 import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
 import type { AccountData } from '../../types/account';
 import { transferService } from '../../services/transferService';
 import type { TransferPayload } from '../../types/transfer';
@@ -15,7 +16,6 @@ export default function Transfer() {
   const [account, setAccount] = useState<AccountData | null>(null);
   const [availableAccounts, setAvailableAccounts] = useState<AccountData[]>([]);
   
-  // Estados do formulário
   const [amount, setAmount] = useState('');
   const [destinationAccount, setDestinationAccount] = useState('');
   const [transferType, setTransferType] = useState<TransferType>('PIX');
@@ -73,122 +73,140 @@ export default function Transfer() {
       AppToast.fire({
         icon: 'success',
         title: 'Transferência Realizada!',
-        html: `
-          <div class="text-left text-sm mt-2 border-t border-gray-100 pt-2">
-            <p><strong>Tipo:</strong> ${transferType}</p>
-            <p><strong>Status:</strong> <span class="text-blue-500">${response.transfer_status}</span></p>
-            <p><strong>Novo Saldo:</strong> R$ ${response.from_account_balance_after}</p>
-          </div>
-        `
+        html: `<div class="text-sm mt-2">Novo Saldo: R$ ${response.from_account_balance_after}</div>`
       });
 
       navigate('/dashboard');
     } catch (error: any) {
-      const serverMessage = error.response?.data?.message || 'Falha ao processar transferência.';
-      AppToast.fire({ icon: 'error', title: serverMessage });
+      AppToast.fire({ 
+        icon: 'error', 
+        title: error.response?.data?.message || 'Falha ao processar transferência.'
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-brand-dark text-white flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-lg">
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-8 group"
-        >
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Voltar
-        </button>
+    <div className="min-h-screen bg-[#0F1115] text-slate-200 p-6 lg:p-12">
+      <div className="max-w-xl mx-auto">
+        
+        <div className="flex items-center justify-between mb-10">
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors group text-sm font-medium"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform inline-block">←</span> Voltar
+          </button>
 
-        <header className="mb-10 text-center lg:text-left">
-          <h1 className="text-4xl font-black italic uppercase tracking-tighter text-brand-purple">
+          {account && (
+            <div className="flex flex-col items-end animate-in fade-in slide-in-from-right-4 duration-700">
+              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Saldo disponível</span>
+              <span className="text-sm font-bold text-green-500/90">
+                R$ {Number(account.balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <header className="mb-12">
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
             Enviar Transferência
           </h1>
-          <p className="text-gray-400 mt-2">Selecione o destino, o método e o valor.</p>
+          <p className="text-slate-500">Preencha os dados abaixo para concluir a transação.</p>
         </header>
 
-        <form 
-          onSubmit={handleTransfer} 
-          className="bg-[#111114] border border-gray-800 rounded-[2.5rem] p-8 shadow-2xl space-y-6"
-        >
-          {/* Conta de Origem */}
-          <div className="px-4 py-2 bg-black/20 rounded-xl border border-dashed border-gray-800">
-            <label className="text-[10px] uppercase text-gray-500 font-bold tracking-widest">Sua Conta (Origem)</label>
-            <p className="text-xs text-gray-400 truncate">{account?.id || 'Carregando...'}</p>
-          </div>
+        <div className="bg-[#16191E] border border-white/5 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-purple/40 to-transparent" />
 
-          {/* Seleção do Tipo de Transferência */}
-          <div className="space-y-2">
-            <label className="text-brand-purple font-bold text-xs uppercase tracking-widest ml-2">
-              Tipo de Transferência
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {['PIX', 'TED', 'DOC'].map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setTransferType(type as TransferType)}
-                  className={`py-3 rounded-xl border text-xs font-bold transition-all ${
-                    transferType === type 
-                      ? 'bg-brand-purple border-brand-purple text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]' 
-                      : 'bg-black/20 border-gray-800 text-gray-500 hover:border-gray-600'
-                  }`}
+          <form onSubmit={handleTransfer} className="space-y-8">
+            
+            <div className="flex items-center justify-between p-4 bg-[#0D0F12] border border-white/5 rounded-xl transition-all group">
+              <div>
+                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-0.5">Sua Conta (Origem)</label>
+                <p className="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">
+                  {account ? account.owner_name : 'Carregando...'}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-mono text-slate-700 uppercase">
+                  #{account?.account_number.substring(0, 8)}...
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Método de Envio</label>
+              <div className="grid grid-cols-3 gap-1.5 p-1.5 bg-[#0D0F12] rounded-xl border border-white/5">
+                {['PIX', 'TED', 'DOC'].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setTransferType(type as TransferType)}
+                    className={`py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+                      transferType === type 
+                        ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20' 
+                        : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Destinatário</label>
+              <div className="relative">
+                <select
+                  value={destinationAccount}
+                  onChange={(e) => setDestinationAccount(e.target.value)}
+                  className="w-full bg-[#0D0F12] border border-white/5 rounded-xl text-sm p-4 outline-none focus:border-brand-purple/40 focus:ring-4 focus:ring-brand-purple/5 transition-all appearance-none cursor-pointer text-slate-200"
+                  required
                 >
-                  {type}
-                </button>
-              ))}
+                  <option value="" disabled>Selecione para quem enviar...</option>
+                  {availableAccounts.map((acc) => (
+                    <option key={acc.id} value={acc.account_number}>
+                      {acc.owner_name} ({acc.account_number})
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-600 italic text-xs">
+                  ▼
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Combobox de Contas de Destino */}
-          <div className="space-y-2">
-            <label className="text-brand-purple font-bold text-xs uppercase tracking-widest ml-2">
-              Conta de Destino
-            </label>
-            <select
-              value={destinationAccount}
-              onChange={(e) => setDestinationAccount(e.target.value)}
-              className="w-full bg-black/20 border border-gray-800 rounded-2xl py-4 px-6 outline-none focus:border-brand-purple transition-all appearance-none cursor-pointer text-sm"
+            <Input 
+              label="Quanto deseja enviar?" 
+              prefix="R$"
+              type="number"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0,00"
+              className="text-3xl font-bold tracking-tight text-white focus:bg-[#0D0F12]"
               required
+            />
+
+            <Button 
+              type="submit" 
+              isLoading={isLoading || !account}
+              variant="primary"
+              className="mt-4 py-4"
             >
-              <option value="" disabled className="bg-[#111114]">Selecione um destinatário...</option>
-              {availableAccounts.map((acc) => (
-                <option key={acc.id} value={acc.account_number} className="bg-[#111114]">
-                  {acc.owner_name} ({acc.account_number.substring(0, 8)}...)
-                </option>
-              ))}
-            </select>
-          </div>
+              {!account ? 'SINCRONIZANDO...' : 'CONFIRMAR TRANSFERÊNCIA'}
+            </Button>
+          </form>
+        </div>
 
-          {/* Valor */}
-          <div className="space-y-2">
-            <label className="text-brand-purple font-bold text-xs uppercase tracking-widest ml-2">
-              Valor da Operação
-            </label>
-            <div className="relative">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-xl font-black text-brand-purple">R$</span>
-              <input 
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-black/20 border border-gray-800 rounded-2xl py-6 pl-16 pr-8 text-2xl font-black outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all"
-                placeholder="0.00"
-                required
-              />
-            </div>
-          </div>
-
-          <Button type="submit" isLoading={isLoading || !account}>
-            {!account ? 'CARREGANDO DADOS...' : 'CONFIRMAR ENVIO'}
-          </Button>
-        </form>
-
-        <p className="text-center text-gray-600 text-[10px] mt-8 uppercase tracking-widest">
-          Transações processadas via Ledger Core em tempo real.
-        </p>
+        <div className="mt-12 flex items-center justify-center gap-3 opacity-20 grayscale">
+            <div className="h-px w-8 bg-slate-600" />
+            <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-slate-500 whitespace-nowrap">
+                Ledger Security Protocol v2.4
+            </p>
+            <div className="h-px w-8 bg-slate-600" />
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   isLoading?: boolean;
@@ -17,16 +16,15 @@ export function Button({
   disabled,
   ...props 
 }: ButtonProps) {
-  
-  const baseStyles = "relative flex items-center justify-center gap-3 py-5 rounded-2xl font-bold transition-all uppercase tracking-[0.15em] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
+  const baseStyles = "relative flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 text-sm";
   
   const variants = {
-    primary: "bg-brand-purple hover:bg-brand-accent text-white shadow-xl shadow-brand-purple/20 hover:scale-[1.02]",
-    secondary: "bg-dark-surface border border-gray-800 text-white hover:bg-gray-800",
-    outline: "bg-transparent border-2 border-brand-purple text-brand-purple hover:bg-brand-purple hover:text-white"
+    primary: "bg-brand-purple hover:brightness-110 text-white shadow-lg shadow-brand-purple/20 ring-1 ring-white/10",
+    secondary: "bg-[#1C2025] border border-white/5 text-slate-300 hover:bg-[#23282f] hover:text-white",
+    outline: "bg-transparent border border-brand-purple/50 text-brand-purple hover:bg-brand-purple/5 hover:border-brand-purple"
   };
 
-  const widthStyle = fullWidth ? 'w-full' : 'px-8';
+  const widthStyle = fullWidth ? 'w-full' : 'px-6';
 
   return (
     <button 
@@ -35,9 +33,10 @@ export function Button({
       {...props}
     >
       {isLoading ? (
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-          <span>Processando...</span>
+        <div className="flex items-center gap-3">
+          {/* Spinner mais fino e elegante */}
+          <div className="w-4 h-4 border-2 border-current/20 border-t-current rounded-full animate-spin"></div>
+          <span className="opacity-80">Carregando...</span>
         </div>
       ) : (
         children
