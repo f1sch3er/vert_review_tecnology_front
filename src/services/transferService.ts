@@ -15,8 +15,14 @@ export const transferService = {
     
     return response.data;
   },
-  getRecentActivity: async () => {
-    const response = await api.get('/transactions/recent-activity/');
-    return response.data;
+  getRecentActivity: async (id?: string, limit?: number) => {
+    if (id) {
+      const { data } = await api.get(`/transactions/recent-activity/${id}/`);
+      return data;
+    }
+
+    const params = limit ? { limit } : {};
+    const { data } = await api.get('/transactions/recent-activity/', { params });
+    return data;
   }
 };

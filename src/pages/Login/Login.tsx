@@ -31,7 +31,6 @@ export default function Login() {
 
       const credentials: LoginCredentials = { email, password };
 
-      // O signIn agora cuida da chamada ao service e do armazenamento dos dados
       await signIn(credentials); 
 
       AppToast.fire({

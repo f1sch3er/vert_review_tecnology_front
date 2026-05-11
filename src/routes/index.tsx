@@ -9,6 +9,8 @@ import Register from '../pages/Register/Register';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import CompleteProfile from '../pages/Register/CompleteProfile';
 import Transfer from '../pages/Transfer/Transfer';
+import TransferHistory from '../pages/Transfer/TransferHistory';
+import TransactionDetail from '../pages/Transfer/TransferDetail';
 
 export function AppRoutes() {
   return (
@@ -22,6 +24,8 @@ export function AppRoutes() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/deposit" element={<Deposit />} />
         <Route path="/transfer" element={<Transfer/>} />
+        <Route path="/transfer-history" element={<TransferHistory/>} />
+        <Route path="/transfer-detail/:id" element={<TransactionDetail />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
       </Route>
 

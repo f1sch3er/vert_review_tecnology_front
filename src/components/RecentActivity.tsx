@@ -3,64 +3,80 @@ import type { RecentActivityProps } from '../types/recent_activity';
 
 export function RecentActivity({ transactions, loading, formatBalance, lang }: RecentActivityProps) {
   return (
-    // MUDANÇA: bg-[#16191E] para combinar com a sidebar e rounded-2xl para ser menos circular
-    <section className="bg-[#16191E] border border-white/5 rounded-2xl p-6 lg:p-8 shadow-sm">
-      <div className="flex justify-between items-end mb-6">
+    <div className="space-y-4">
+      {/* HEADER DA SEÇÃO */}
+      <div className="flex justify-between items-end px-2 mb-2">
         <div>
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <span className="text-brand-purple text-xl">#</span> Transações Recentes
+          <h3 className="text-[11px] font-black text-brand-purple uppercase tracking-[0.2em] italic flex items-center gap-2">
+            <span className="w-2 h-2 bg-brand-purple rounded-full animate-pulse" />
+            {lang === 'PT' ? 'Transações Recentes' : 'Recent Activity'}
           </h3>
-          <p className="text-[11px] text-slate-500 font-medium">Seu histórico financeiro atualizado</p>
         </div>
         <Link 
-          to="/transactions" 
-          className="text-[11px] font-bold text-brand-purple hover:text-brand-purple/80 transition-colors flex items-center gap-1 group"
+          to="/history" 
+          className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-widest italic"
         >
-          Ver tudo <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+          {lang === 'PT' ? 'Ver histórico completo' : 'View full history'} →
         </Link>
       </div>
 
+      {/* LISTA DE CARDS */}
       <div className="space-y-3">
         {loading ? (
           [1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-white/[0.02] rounded-xl border border-white/5 animate-pulse" />
+            <div key={i} className="h-24 bg-[#16191E] rounded-2xl border border-white/5 animate-pulse" />
           ))
         ) : transactions.length > 0 ? (
           transactions.map((tx) => (
-            <div 
+            <Link 
               key={tx.id} 
-              className="flex items-center justify-between p-4 bg-[#1C2025] rounded-xl border border-white/5 group hover:border-brand-purple/30 transition-all"
+              to={`/transfer-detail/${tx.id}`}
+              className="group relative flex items-center justify-between p-6 bg-[#16191E] rounded-2xl border border-white/5 hover:border-brand-purple/40 hover:bg-[#1C2025] transition-all shadow-xl shadow-black/20 block"
             >
-              <div className="flex items-center gap-4">
-                {/* Ícones menores e mais discretos */}
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${
-                  tx.direction === 'IN' ? 'bg-green-500/10 text-green-500' : 'bg-slate-500/10 text-slate-400'
+              {/* Indicador Lateral de Hover */}
+              <div className="absolute left-0 top-4 bottom-4 w-1 bg-brand-purple rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity" />
+
+              <div className="flex items-center gap-5">
+                {/* Ícone Redondo Direcional */}
+                <div className={`w-12 h-12 rounded-xl border flex items-center justify-center text-lg font-black transition-transform group-hover:scale-110 ${
+                  tx.direction === 'IN' 
+                    ? 'bg-green-500/5 border-green-500/10 text-green-500' 
+                    : 'bg-red-500/5 border-red-500/10 text-red-500'
                 }`}>
                   {tx.direction === 'IN' ? '↓' : '↑'}
                 </div>
+                
                 <div>
-                  <p className="font-semibold text-sm text-slate-200">{tx.type_display}</p>
-                  <p className="text-[10px] text-slate-500 font-medium">
-                    {tx.date_formatted}
+                  <p className="font-black text-sm text-slate-200 group-hover:text-white transition-colors uppercase italic tracking-tight">
+                    {tx.type_display || (lang === 'PT' ? 'Transferência' : 'Transfer')}
+                  </p>
+                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.1em] mt-0.5">
+                    {tx.date_formatted} • <span className="text-brand-purple/50">REF: {tx.id.toString().substring(0, 8)}</span>
                   </p>
                 </div>
               </div>
               
               <div className="text-right">
-                <span className={`font-bold text-sm ${tx.direction === 'IN' ? 'text-green-500' : 'text-slate-200'}`}>
-                  {tx.direction === 'IN' ? '+' : '-'} {lang === 'PT' ? 'R$' : '$'} {formatBalance(tx.amount)}
-                </span>
+                <p className={`font-black text-lg italic tracking-tighter ${
+                  tx.direction === 'IN' ? 'text-green-500' : 'text-slate-300'
+                }`}>
+                  {tx.direction === 'IN' ? '+' : '-'} {lang === 'PT' ? 'R$' : '$'} {formatBalance(tx.amount).replace(/[^\d.,]/g, '')}
+                </p>
+                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                  <span className="text-[9px] text-brand-purple font-black uppercase italic">Details</span>
+                  <span className="text-brand-purple text-xs">→</span>
+                </div>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
-
-          <div className="py-12 text-center border border-dashed border-white/5 rounded-xl">
-            <div className="text-2xl mb-2 opacity-20">📁</div>
-            <p className="text-slate-500 text-xs font-medium">Nenhuma transação encontrada no período.</p>
+          <div className="py-16 text-center border-2 border-dashed border-white/5 rounded-2xl">
+            <p className="text-slate-600 font-black uppercase tracking-[0.2em] italic opacity-50 text-[10px]">
+              {lang === 'PT' ? 'Nenhum fluxo de dados detectado' : 'No data streams detected'}
+            </p>
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

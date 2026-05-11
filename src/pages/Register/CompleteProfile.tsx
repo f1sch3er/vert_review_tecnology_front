@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { AppToast } from '../../utils/alerts';
-import { userService } from '../../services/userService'; 
-
+import { userService } from '../../services/userService';
 
 export default function RegisterComplement() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export default function RegisterComplement() {
     phone_number: '',
     birth_date: '',
     document_number: '',
-    document_type: 'CPF',
+    document_type: 'CPF' as 'CPF' | 'CNPJ',
     address: {
       street: '',
       city: '',
@@ -40,13 +39,21 @@ export default function RegisterComplement() {
     }
   };
 
+  const handleTypeChange = (type: 'CPF' | 'CNPJ') => {
+    setFormData(prev => ({
+      ...prev,
+      document_type: type,
+      document_number: '' // Limpa para evitar formato errado no banco
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       await userService.completeRegistration(formData);
-   
+
       AppToast.fire({
         icon: 'success',
         title: 'Profile Updated!',
@@ -56,7 +63,7 @@ export default function RegisterComplement() {
       });
 
       setTimeout(() => {
-        navigate('/dashboard'); 
+        navigate('/dashboard');
       }, 1500);
 
     } catch (error: any) {
@@ -72,12 +79,11 @@ export default function RegisterComplement() {
         msg = errorData[firstKey];
       }
 
-      AppToast.fire({ 
-        icon: 'error', 
+      AppToast.fire({
+        icon: 'error',
         title: 'Attention',
-        text: msg 
+        text: msg
       });
-
     } finally {
       setIsLoading(false);
     }
@@ -94,11 +100,43 @@ export default function RegisterComplement() {
           </header>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* Document Type Selector */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                Account Type
+              </label>
+              <div className="grid grid-cols-2 gap-2 p-1 bg-[#1C2025] rounded-xl border border-white/5">
+                <button
+                  type="button"
+                  onClick={() => handleTypeChange('CPF')}
+                  className={`py-2.5 text-[11px] font-black rounded-lg transition-all tracking-wider ${
+                    formData.document_type === 'CPF' 
+                    ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20' 
+                    : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  PERSONAL (CPF)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTypeChange('CNPJ')}
+                  className={`py-2.5 text-[11px] font-black rounded-lg transition-all tracking-wider ${
+                    formData.document_type === 'CNPJ' 
+                    ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20' 
+                    : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  BUSINESS (CNPJ)
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <Input 
-                label="Document (CPF)" 
+                label={`Document (${formData.document_type})`} 
                 name="document_number" 
-                placeholder="000.000.000-00"
+                placeholder={formData.document_type === 'CPF' ? "000.000.000-00" : "00.000.000/0000-00"}
                 value={formData.document_number} 
                 onChange={handleChange} 
                 required 
@@ -171,7 +209,7 @@ export default function RegisterComplement() {
             <Button 
               type="submit"
               isLoading={isLoading}
-              className="mt-8 py-4 text-sm tracking-[0.1em] font-bold"
+              className="mt-8 py-4 text-sm tracking-[0.1em] font-bold bg-brand-purple hover:bg-brand-purple/90"
             >
               FINALIZE REGISTRATION
             </Button>
@@ -185,6 +223,7 @@ export default function RegisterComplement() {
         </div>
       </div>
 
+      {/* Right Side: Visual Branding */}
       <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-[#0F1115] via-[#16191E] to-brand-purple/20 justify-center items-center border-l border-white/5 relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-purple/5 rounded-full blur-[120px]" />
         

@@ -30,5 +30,11 @@ export const userService = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const { data } = await api.post<LoginResponse>('/auth/', credentials);
     return data;
+  },
+
+  check_profile: async (email:string) => {
+    const { data } = await api.get('/users/has-profile/', { params: { email } });
+    return data.has_profile;
   }
+
 };

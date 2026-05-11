@@ -26,30 +26,29 @@ export default function Deposit() {
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     const numericAmount = parseFloat(amount.replace(',', '.'));
 
     if (!numericAmount || numericAmount <= 0) {
-      AppToast.fire({ icon: 'error', title: 'Informe um valor válido para depósito.' });
+      AppToast.fire({ icon: 'error', title: 'Informe um valor válido.' });
       return;
     }
 
     setIsLoading(true);
-
     try {
       await accountService.deposit(numericAmount.toFixed(2));
-
       AppToast.fire({
         icon: 'success',
-        title: 'Depósito processado!',
-        text: 'O saldo será atualizado em instantes via Ledger Protocol.'
+        title: 'Deposit Processed!',
+        text: 'The balance will be updated via Ledger Protocol.',
+        timer: 2000,
+        showConfirmButton: false
       });
-
-      navigate('/dashboard');
+      setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error: any) {
       AppToast.fire({
         icon: 'error',
-        title: error.response?.data?.message || 'Erro ao processar depósito.'
+        title: 'Attention',
+        text: error.response?.data?.message || 'Error processing deposit.'
       });
     } finally {
       setIsLoading(false);
@@ -59,101 +58,117 @@ export default function Deposit() {
   const quickValues = ['50', '100', '500', '1000'];
 
   return (
-    <div className="min-h-screen bg-[#0F1115] text-slate-200 p-6 lg:p-12">
-      <div className="max-w-xl mx-auto">
+    <div className="flex min-h-screen bg-[#0F1115] font-sans">
+      {/* LADO ESQUERDO: FORMULÁRIO */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-24 py-12 relative">
         
-        {/* Top Bar: Voltar + Saldo Rápido (Agora em VERDE) */}
-        <div className="flex items-center justify-between mb-10">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors group text-sm font-medium"
-          >
-            <span className="group-hover:-translate-x-1 transition-transform inline-block">←</span> Voltar
-          </button>
+        {/* Botão Voltar Estilizado */}
+        <button 
+          onClick={() => navigate(-1)}
+          className="absolute top-12 left-8 md:left-24 text-[10px] font-black text-slate-500 hover:text-brand-purple uppercase tracking-[0.3em] transition-all italic"
+        >
+          ← Back to Dashboard
+        </button>
 
-          {account && (
-            <div className="flex flex-col items-end animate-in fade-in slide-in-from-right-4 duration-700">
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Saldo Atual</span>
-              <span className="text-sm font-bold text-green-500/90">
-                R$ {Number(account.balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <header className="mb-12">
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-2 uppercase italic">
-            Adicionar Saldo
-          </h1>
-          <p className="text-slate-500">Aumente seu limite de transações via depósito imediato.</p>
-        </header>
-
-        <div className="bg-[#16191E] border border-white/5 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-purple/40 to-transparent" />
+        <div className="max-w-md w-full mx-auto space-y-10">
+          <header>
+            <h2 className="text-4xl font-black tracking-tighter text-white italic uppercase leading-none">
+              Add<br/>Credits
+            </h2>
+            <p className="mt-4 text-slate-500 text-lg">Immediate liquidation via secure ledger protocol.</p>
+          </header>
 
           <form onSubmit={handleDeposit} className="space-y-8">
             
-            <div className="space-y-4">
+            {/* Input de Valor Estilizado como o do Cadastro */}
+            <div className="space-y-6">
               <Input 
-                label="Valor do Depósito" 
-                prefix="R$"
+                label="Amount to Deposit (BRL)" 
+                name="amount"
                 type="number"
                 step="0.01"
-                placeholder="0,00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="text-4xl font-black tracking-tighter text-white focus:bg-[#0D0F12]"
-                required
+                placeholder="0.00"
+                value={amount} 
+                onChange={(e) => setAmount(e.target.value)} 
+                required 
               />
 
-              <div className="flex gap-2 ml-1">
-                {quickValues.map((val) => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => setAmount(val)}
-                    className="px-3 py-1.5 rounded-lg bg-[#0D0F12] border border-white/5 text-[10px] font-bold text-slate-500 hover:text-brand-purple hover:border-brand-purple/30 transition-all"
-                  >
-                    + R$ {val}
-                  </button>
-                ))}
+              {/* Atalhos de Valor padronizados com o Toggle do cadastro */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Quick Select
+                </label>
+                <div className="grid grid-cols-4 gap-2 p-1 bg-[#1C2025] rounded-xl border border-white/5">
+                  {quickValues.map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setAmount(val)}
+                      className={`py-2 text-[11px] font-black rounded-lg transition-all tracking-wider ${
+                        amount === val 
+                        ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20' 
+                        : 'text-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      +{val}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="bg-brand-purple/5 border border-brand-purple/10 rounded-xl p-6 space-y-3">
-              <h3 className="text-brand-purple font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-brand-purple rounded-full animate-pulse" />
-                Info de Processamento
-              </h3>
-              <ul className="text-xs text-slate-500 space-y-2 leading-relaxed">
-                <li className="flex gap-2">
-                   <span className="text-brand-purple">•</span>
-                   <span>Liquidação garantida via mensageria de alta disponibilidade.</span>
-                </li>
-                <li className="flex gap-2">
-                   <span className="text-brand-purple">•</span>
-                   <span>O valor estará disponível para operações PIX/TED imediatamente.</span>
-                </li>
-              </ul>
+            {/* Info de Conta Destino (estilo Detail Box) */}
+            <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-1.5 bg-brand-purple rounded-full animate-pulse" />
+                <h4 className="font-black text-[10px] text-slate-500 uppercase tracking-widest italic">Target Node</h4>
+              </div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">
+                {account?.owner_name || 'User'} 
+                <span className="mx-2 opacity-20">|</span> 
+                <span className="text-brand-purple font-mono italic">
+                  ID: {account?.account_number.substring(0, 8)}
+                </span>
+              </p>
             </div>
 
             <Button 
-              type="submit" 
+              type="submit"
               isLoading={isLoading}
-              variant="primary"
-              className="py-5 text-sm tracking-[0.1em]"
+              className="w-full py-4 text-sm tracking-[0.2em] font-black bg-brand-purple hover:bg-brand-purple/90 italic uppercase"
             >
-              CONFIRMAR DEPÓSITO
+              Confirm Transaction
             </Button>
           </form>
-        </div>
 
-        <div className="mt-12 flex items-center justify-center gap-3 opacity-20 grayscale">
-            <div className="h-px w-8 bg-slate-600" />
-            <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-slate-500 whitespace-nowrap">
-                Ledger Security Protected
+          <footer className="pt-4">
+             <p className="text-[10px] text-slate-600 leading-relaxed font-bold italic uppercase tracking-tighter opacity-60">
+                Transactions are audited in real-time. Assets available immediately after block confirmation.
+             </p>
+          </footer>
+        </div>
+      </div>
+
+      {/* LADO DIREITO: VISUAL (Mesmo padrão da outra tela) */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-[#0F1115] via-[#16191E] to-brand-purple/20 justify-center items-center border-l border-white/5 relative overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-purple/5 rounded-full blur-[120px]" />
+        
+        <div className="text-center p-12 relative z-10">
+            {/* Badge de Saldo Atual flutuante */}
+            {account && (
+              <div className="inline-block mb-8 px-4 py-2 bg-white/5 border border-white/10 rounded-full backdrop-blur-md animate-bounce-slow">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2">Current:</span>
+                <span className="text-sm font-black text-green-500 italic">R$ {Number(account.balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+            )}
+
+            <h1 className="text-6xl font-black text-white mb-6 italic tracking-tighter uppercase leading-none">
+              Inbound<br/>Flow
+            </h1>
+            <div className="h-1 w-20 bg-brand-purple mx-auto mb-8" />
+            <p className="text-slate-400 max-w-sm mx-auto text-lg leading-relaxed font-medium">
+              Seamlessly increase your liquidity with our distributed ledger system.
             </p>
-            <div className="h-px w-8 bg-slate-600" />
         </div>
       </div>
     </div>

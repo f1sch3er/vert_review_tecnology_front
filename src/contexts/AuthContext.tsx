@@ -20,13 +20,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Busca os dados salvos ao carregar a página (F5)
     const storagedUser = localStorage.getItem('@Ledger:user');
     const storagedToken = localStorage.getItem('@Ledger:token');
 
     if (storagedUser && storagedToken) {
       setUser(JSON.parse(storagedUser));
-      // Configura o axios para todas as chamadas futuras
       api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
     }
     
